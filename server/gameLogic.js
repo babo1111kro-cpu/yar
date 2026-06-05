@@ -695,13 +695,24 @@ function processAction(state, playerId, action) {
 
       // 자동 드로우 (선공 첫 턴 아닌 경우)
       const nextPlayer = state.players[oppId];
-      if (!nextPlayer.isFirstTurn) {
-        if (nextPlayer.deck.length > 0) {
-          const drawn = player.deck.shift();
-      player.hand.push(drawn);
-      player.drawnThisTurn = true;
+if (!nextPlayer.isFirstTurn) {
+  if (nextPlayer.deck.length > 0) {
+    const drawn = nextPlayer.deck.shift();  // ← nextPlayer로 수정
+    nextPlayer.hand.push(drawn);            // ← nextPlayer로 수정
+    nextPlayer.drawnThisTurn = true;        // ← nextPlayer로 수정
+    log.push(`[드로우] ${drawn.name}`);
+    
+    if (nextPlayer.hand.length > 6) {
+      log.push(`[손패 초과] ${oppId}의 손패가 6장 초과. 1장을 버려주세요.`);
+    }
+  } else {
+    state.phase = 'ended';
+    state.winner = playerId;
+    log.push(`[덱 아웃] ${oppId}의 덱이 비었습니다! ${playerId} 승리!`);
+  }
+}
       log.push(`[드로우] ${drawn.name}`);
-
+	
           if (nextPlayer.hand.length > 6) {
             log.push(`[손패 초과] ${oppId}의 손패가 6장 초과. 1장을 버려주세요.`);
           }
