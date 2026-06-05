@@ -292,6 +292,7 @@ function processAction(state, playerId, action) {
       }
       const drawn = player.deck.shift();
       player.hand.push(drawn);
+      player.drawnThisTurn = true;
       log.push(`[드로우] ${drawn.name}`);
 
       // 손패 제한 6장
