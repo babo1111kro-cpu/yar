@@ -54,8 +54,9 @@ function createGameState(player1Id, player2Id, deck1, deck2) {
     fieldMagicZone: null,                 // 필드 마법 구역
     graveyard: [],
     // 상태
-    normalSummonedThisTurn: false,
+        normalSummonedThisTurn: false,
     hasAttackedThisTurn: false,
+    drawnThisTurn: false,
     isFirstTurn: isFirst,
     spellsUsedThisTurn: 0,
     // 1회성 사용 추적
@@ -279,8 +280,9 @@ function processAction(state, playerId, action) {
 
   switch (action.type) {
     // ─── 드로우 ───
-    case 'DRAW': {
+   case 'DRAW': {
       if (player.isFirstTurn) return { state, log: ['선공 첫 턴은 드로우할 수 없습니다.'] };
+      if (player.drawnThisTurn) return { state, log: ['이번 턴에 이미 드로우했습니다.'] };
       if (player.deck.length === 0) {
         // 덱 아웃 → 패배
         state.phase = 'ended';
@@ -675,6 +677,7 @@ function processAction(state, playerId, action) {
       player.isFirstTurn = false;
       player.normalSummonedThisTurn = false;
       player.spellsUsedThisTurn = 0;
+      player.drawnThisTurn = false;
 
       // 공격 가능 초기화
       for (const card of getFieldMonsters(player)) {
@@ -694,9 +697,11 @@ function processAction(state, playerId, action) {
       const nextPlayer = state.players[oppId];
       if (!nextPlayer.isFirstTurn) {
         if (nextPlayer.deck.length > 0) {
-          const drawn = nextPlayer.deck.shift();
-          nextPlayer.hand.push(drawn);
-          log.push(`[드로우] ${oppId}: ${drawn.name}`);
+          const drawn = player.deck.shift();
+      player.hand.push(drawn);
+      player.drawnThisTurn = true;
+      log.push(`[드로우] ${drawn.name}`);
+
           if (nextPlayer.hand.length > 6) {
             log.push(`[손패 초과] ${oppId}의 손패가 6장 초과. 1장을 버려주세요.`);
           }
