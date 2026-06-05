@@ -3,8 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 const { createGameState, processAction, getFieldMonsters } = require('./gameLogic');
 const CARDS = require('./cards.json');
 
+const http = require('http');
+const server = http.createServer();
 const PORT = process.env.PORT || 3001;
-const wss = new WebSocket.Server({ port: PORT });
+const wss = new WebSocket.Server({ server });
+server.listen(PORT, () => {
+  console.log(`카드게임 서버 실행 중: ws://localhost:${PORT}`);
+});
 
 // 대기실: roomId -> { players: [{id, ws, name}], status }
 const rooms = new Map();
